@@ -1,0 +1,37 @@
+name: $(TeamProject)_$(Build.DefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+
+trigger:
+- none
+
+resources:
+  repositories:
+    - repository: CICD
+      name: 'Plateforme Technologique/CICD'
+      type: git
+      ref: 'refs/heads/develop'
+
+variables:
+  applicationName: 'KPMG Pulse'
+  major: 1
+
+stages:
+- stage: recette
+  displayName: "[Recette] Pulse - Run Web Inspector"
+  pool:
+    vmImage: ubuntu-latest
+  jobs:
+  - job: web_inspector_rec
+    displayName: "Run Web Inspector on Pulse REC"
+    variables:
+      - group: REC Web-inspector
+    steps:
+    - checkout: self
+      path: pulse
+
+    - template: templates/Deploy/Steps/Start-WebInspector.yaml@CICD
+      parameters:
+        flowConfigPath: ../samples/flow.js
+        flowEnvironment:
+          PULSE_URL: $(DISCOVERY_URL)
+          PULSE_USERNAME: $(DISCOVERY_USERNAME)
+          PULSE_PASSWORD: $(DISCOVERY_PASSWORD)
